@@ -7,12 +7,13 @@ import {
   MenubarShortcut,
   MenubarTrigger,
 } from "@/components/ui/menubar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import { auth } from "../../auth";
+import Image from "next/image";
 
-export default function Header() {
-  const session = { name: "Bilal" };
+export default async function Header() {
+  const session = await auth();
   return (
     <div className="bg-secondary py-3">
       <div className="flex container mx-auto justify-between">
@@ -20,11 +21,13 @@ export default function Header() {
         {session ? (
           <Menubar>
             <MenubarMenu>
-              <MenubarTrigger className={"border-none bg-transparent p-0"}>
-                <Avatar>
-                  <AvatarImage src="https://github.com/shadcn.png" />
-                  <AvatarFallback>DAS</AvatarFallback>
-                </Avatar>
+              <MenubarTrigger className={"border-none bg-transparent p-0 m-0"}>
+                <Image
+                  src={session?.user?.image}
+                  height={40}
+                  width={40}
+                  className="rounded-full"
+                />
               </MenubarTrigger>
               <MenubarContent>
                 <Link href={"/profile"}>
