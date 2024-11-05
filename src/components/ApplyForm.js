@@ -24,71 +24,56 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { addRequest } from "@/actions/requests";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
-  name: z.string().min(2).max(50),
   bio: z.string().min(2).max(120),
   hospital: z.string().min(2).max(50),
-  days: z.array(z.string()).min(1, "Select at least one day"),
   fees: z.string(),
   gender: z.string(),
   appointmentTime: z.string(),
   degree: z.string(),
   specialization: z.string(),
   experience: z.string(),
-  profileImg: z.string().url("Enter a valid image URL"),
   number: z.string().regex(/^\d+$/, "Enter a valid phone number"),
-  email: z.string().email("Enter a valid email address"),
   address: z.string().min(5),
 });
 
-export default function DoctorForm () {
+export default function DoctorForm({ session }) {
+  const { toast } = useToast();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
       bio: "",
       hospital: "",
-      days: [],
       fees: "",
       gender: "",
       appointmentTime: "",
       degree: "",
       specialization: "",
       experience: "",
-      profileImg: "",
       number: "",
-      email: "",
       address: "",
     },
   });
-  const onDrop = useCallback((acceptedFiles) => {
-    // Do something with the files
-  }, []);
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
-  function onSubmit(values) {
+  async function onSubmit(values) {
     console.log(values);
+    values.user = session.user._id;
+    console.log("values=>", values);
+    await addRequest(values);
+    form.reset()
+    toast({
+      title: "Your application is submitted.",
+      description: "You will be informed by email in 3 business days.",
+    });
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-2 gap-5">
-          <FormField
-            name="name"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <FormField
             name="hospital"
             control={form.control}
@@ -97,41 +82,6 @@ export default function DoctorForm () {
                 <FormLabel>Hospital</FormLabel>
                 <FormControl>
                   <Input placeholder="Enter hospital name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            name="days"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Available Days</FormLabel>
-
-                <FormControl>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Available" />
-                    </SelectTrigger>
-                    <SelectContent
-                      multiple
-                      placeholder="Select days"
-                      onChange={(selectedOptions) =>
-                        field.onChange(
-                          selectedOptions.map((option) => option.value)
-                        )
-                      }
-                    >
-                      <SelectItem value="Mon">Mon</SelectItem>
-                      <SelectItem value="Tue">Tue</SelectItem>
-                      <SelectItem value="Wed">Wed</SelectItem>
-                      <SelectItem value="Thu">Thu</SelectItem>
-                      <SelectItem value="Fri">Fri</SelectItem>
-                      <SelectItem value="Sat">Sat</SelectItem>
-                      <SelectItem value="Sun">Sun</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -235,20 +185,6 @@ export default function DoctorForm () {
           />
 
           <FormField
-            name="email"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter email address" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
             name="address"
             control={form.control}
             render={({ field }) => (
@@ -277,8 +213,7 @@ export default function DoctorForm () {
           )}
         />
 
-
-        <Button type="submit">Submit</Button>
+        <Button type="submit">{form.formState.isSubmitting ? "Loading" : "Submit"}</Button>
       </form>
     </Form>
   );
