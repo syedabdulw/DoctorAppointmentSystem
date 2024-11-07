@@ -6,6 +6,19 @@ export async function POST(req) {
   try {
     const obj = await req.json();
 
+    const isUserRequestedBefore = await RequestModal.findOne({
+      user: obj.user,
+    });
+    if (isUserRequestedBefore) {
+      return Response.json(
+        {
+          error: true,
+          msg: "You had already applied as a doctor",
+        },
+        { status: 403 }
+      );
+    }
+
     let newRequest = await new RequestModal({ ...obj });
     newRequest = await newRequest.save();
 

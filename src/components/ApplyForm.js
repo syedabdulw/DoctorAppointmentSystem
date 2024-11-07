@@ -62,18 +62,27 @@ export default function DoctorForm({ session }) {
     console.log(values);
     values.user = session.user._id;
     console.log("values=>", values);
-    await addRequest(values);
-    form.reset()
-    toast({
-      title: "Your application is submitted.",
-      description: "You will be informed by email in 3 business days.",
-    });
+    const response = await addRequest(values);
+    console.log("response=>", response);
+    if (response.error) {
+      form.reset();
+      toast({
+        title: "Sorry , Your application cannot be submitted.",
+        description: response.msg,
+      });
+    } else {
+      form.reset();
+      toast({
+        title: "Your application is submitted.",
+        description: "You will be informed by email in 3 business days.",
+      });
+    }
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 m-2 lg:grid-cols-2 gap-5">
           <FormField
             name="hospital"
             control={form.control}
@@ -213,7 +222,9 @@ export default function DoctorForm({ session }) {
           )}
         />
 
-        <Button type="submit">{form.formState.isSubmitting ? "Loading" : "Submit"}</Button>
+        <Button type="submit">
+          {form.formState.isSubmitting ? "Loading" : "Submit"}
+        </Button>
       </form>
     </Form>
   );
