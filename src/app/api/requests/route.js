@@ -9,6 +9,7 @@ export async function POST(req) {
     const isUserRequestedBefore = await RequestModal.findOne({
       user: obj.user,
     });
+    console.log("isUserRequestedBefore=>", isUserRequestedBefore);
     if (isUserRequestedBefore) {
       return Response.json(
         {
