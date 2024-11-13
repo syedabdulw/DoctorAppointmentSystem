@@ -43,7 +43,7 @@ export default async function DoctorsSection({ isHome }) {
 
       <div className="grid my-3 grid-cols-1 md:grid-cols-2 mt-10 lg:grid-cols-3 gap-3">
         {requests.map((request) => (
-          <DoctorCard request={request} isAdmin={false} />
+          <DoctorCard key={request._id} request={request} isAdmin={false} />
         ))}
       </div>
     </div>
