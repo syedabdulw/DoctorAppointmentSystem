@@ -45,7 +45,14 @@ export async function POST(req) {
 
 export async function GET(req) {
   await connectDB();
-  const requests = await RequestModal.find().populate("user");
+  // console.log(req);
+  const query = {};
+  const status = req?.nextUrl?.searchParams?.get("status");
+  if (status && status != "all") {
+    query.status = status;
+  }
+
+  const requests = await RequestModal.find(query).populate("user");
   return Response.json(
     {
       error: false,
@@ -61,6 +68,9 @@ export async function PUT(req) {
   try {
     const obj = await req.json();
     let { id, status } = obj;
+    const request = await RequestModal.findOne({ _id: id });
+
+    await UserModal.findOneAndUpdate({ _id: request.user }, { role: "doctor" });
     const updated = await RequestModal.findOneAndUpdate(
       {
         _id: id,
