@@ -15,23 +15,43 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import DoctorAppointmentCard from "@/components/DoctorAppointmentCard/DoctorAppointmentCard";
 import PatientAppointmentCard from "@/components/PatientAppointmentCard/PatientAppointmentCard";
+import AppointmentFilterTabs from "@/components/Tabs/Tabs";
 dayjs.extend(relativeTime);
 
-export default async function Appointments() {
+export default async function Appointments({ searchParams }) {
   const session = await auth();
-  console.log("session=>", session);
-  const { appointments } = await getAppointments(
-    session.user.role == "doctor" ? "doctor" : "user",
-    session.user._id
-  );
 
+  const { status } = searchParams;
+  console.log("session=>", session);
+  const { appointments, stats } = await getAppointments(
+    session.user.role == "doctor" ? "doctor" : "user",
+    session.user._id,
+    status
+  );
   const isDoctor = session.user.role == "doctor";
   return (
     <div className="container mx-auto">
-
       <h1 className="font-bold text-2xl mt-10">
         {isDoctor ? "Patients Appointments" : "Your Doctors Appointments"}
       </h1>
+
+      <AppointmentFilterTabs status={status} />
+
+      <div className="flex gap-4">
+        <div className="shadow flex-grow p-3 rounded border">
+          <h1 className="font font-bold text-2xl">Pending : {stats.pending}</h1>
+        </div>
+        <div className="shadow flex-grow p-3 rounded border">
+          <h1 className="font font-bold text-2xl">
+            Accepted : {stats.accepted}
+          </h1>
+        </div>
+        <div className="shadow flex-grow p-3 rounded border">
+          <h1 className="font font-bold text-2xl">
+            Cancelled : {stats.cancelled}
+          </h1>
+        </div>
+      </div>
       <div className="my-10 grid grid-cols-3 gap-4">
         {appointments?.map((appointment) =>
           isDoctor ? (

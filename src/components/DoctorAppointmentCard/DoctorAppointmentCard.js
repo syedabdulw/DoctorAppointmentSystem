@@ -1,3 +1,4 @@
+"use client";
 import {
   Card,
   CardContent,
@@ -7,12 +8,28 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin } from "lucide-react";
+import { Calendar, CheckCircle, Clock, MapPin, XCircle } from "lucide-react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { Button } from "../ui/button";
+import { updateAppointment } from "@/actions/appointment";
+import { useState } from "react";
 dayjs.extend(relativeTime);
 
 export default function DoctorAppointmentCard({ appointment }) {
+  const [loading, setLoading] = useState(false);
+  const handleAccept = async () => {
+    setLoading(true);
+    await updateAppointment(appointment._id, "accepted");
+    setLoading(false);
+  };
+
+  const handleReject = async () => {
+    setLoading(true);
+    await updateAppointment(appointment._id, "cancelled");
+    setLoading(false);
+  };
+
   return (
     <Card key={appointment._id} className="shadow-lg">
       <CardHeader className="flex flex-row items-center gap-4">
@@ -73,6 +90,31 @@ export default function DoctorAppointmentCard({ appointment }) {
           Fees: ${appointment.request.fees}
         </p>
       </CardContent>
+      <CardFooter className="justify-end space-x-2">
+        {loading && <span>Loading...</span>}
+        {appointment.status === "pending" && (
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleAccept(appointment._id)}
+              className="flex items-center gap-2"
+            >
+              <CheckCircle className="h-4 w-4" />
+              Accept
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleReject(appointment._id)}
+              className="flex items-center gap-2"
+            >
+              <XCircle className="h-4 w-4" />
+              Reject
+            </Button>
+          </>
+        )}
+      </CardFooter>
     </Card>
   );
 }

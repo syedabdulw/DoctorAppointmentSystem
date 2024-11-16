@@ -12,12 +12,12 @@ export async function addAppointment(data) {
   return add;
 }
 
-export async function getAppointments(role, id) {
+export async function getAppointments(role, id, status = "pending") {
   let url;
   if (role == "user") {
-    url = `${process.env.BASE_URL}api/appointment?user=${id}`;
+    url = `${process.env.BASE_URL}api/appointment?user=${id}&status=${status}`;
   } else {
-    url = `${process.env.BASE_URL}api/appointment?doctor=${id}`;
+    url = `${process.env.BASE_URL}api/appointment?doctor=${id}&status=${status}`;
   }
   let appointments = await fetch(url, {
     cache: "no-cache",
@@ -25,4 +25,13 @@ export async function getAppointments(role, id) {
   appointments = appointments.json();
 
   return appointments;
+}
+
+export async function updateAppointment(id, status) {
+  let update = await fetch(`${process.env.BASE_URL}api/appointment`, {
+    method: "PUT",
+    body: JSON.stringify({ id, status }),
+  });
+
+  revalidatePath("/appointments");
 }
