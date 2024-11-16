@@ -35,7 +35,12 @@ export async function GET(req) {
   const query = {};
   const doctor = req?.nextUrl?.searchParams?.get("doctor");
   const user = req?.nextUrl?.searchParams?.get("user");
-  if (doctor) query.request = doctor;
+
+  if (doctor) {
+    const doctorRequest = await RequestModal.findOne({ user: doctor });
+    query.request = doctorRequest._id;
+  }
+
   if (user) query.user = user;
 
   const appointments = await AppointmentModal.find(query)
